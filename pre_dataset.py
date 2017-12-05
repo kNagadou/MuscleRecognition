@@ -7,23 +7,24 @@ import sys
 import cv2
 
 # cascade path
-CASCADE_PATH = "opencv_cascade_clasisifier/"
-
+CASCADE_PATH = "opencv_cascade_classifier/"
 # cascade file
 UPPER_BODY = "haarcascade_upperbody.xml"
+FULL_BODY = "haarcascade_fullbody.xml"
+LOWER_BODY = "haarcascade_lowerbody.xml"
+# images
+IMAGES = "images/"
+# prefix "extracted"
+PREFIX_EXTRACTED = "_extracted"
 
 
-def pre_work(image_path):
+def pre_work(image_path, isReprocessiong=True):
     # http://famirror.hateblo.jp/entry/2015/12/19/180000
     resize = 100
+
     path = os.path.splitext(image_path)
-    new_image_path = path[0] + '_face' + path[1]
-
-    # 処理済みであれば再処理しない
-    if '_face' in image_path:
-        return image_path
-
-    if os.path.exists(new_image_path):
+    new_image_path = path[0] + PREFIX_EXTRACTED + path[1]
+    if os.path.exists(new_image_path) and isReprocessiong:
         print('already exists file. {}'.format(new_image_path))
         return ""
 
@@ -36,14 +37,15 @@ def pre_work(image_path):
     # グレースケール変換
     image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     # カスケード分類器の特徴量を取得する
-    cascade = cv2.CascadeClassifier(CASCADE_PATH + UPPER_BODY)
-    # 物体認識処理
+    cascade = cv2.CascadeClassifier(CASCADE_PATH + LOWER_BODY)
+    # オブジェクト認識
     # http://workpiles.com/2015/04/opencv-detectmultiscale-scalefactor/
     # http://workpiles.com/2015/04/opencv-detectmultiscale-minneighbors/
-    rectangle = cascade.detectMultiScale(image_gray, scaleFactor=1.11, minNeighbors=4, minSize=(40, 40))
+    rectangle = cascade.detectMultiScale(image_gray, scaleFactor=1.01, minNeighbors=4, minSize=(70, 70))
 
     if len(rectangle):
-        # 顔だけ切り出し
+        print(len(rectangle))
+        # オブジェクト切り出し
         x = rectangle[0][0]
         y = rectangle[0][1]
         width = rectangle[0][2]
@@ -65,7 +67,7 @@ def write_csv(outdir, csvname, data):
 
 if __name__ == '__main__':
     random.seed()
-    outDir = sys.argv[1]
+    outDir = IMAGES
     traincsv = 'train.csv'
     testcsv = 'test.csv'
     traindata = []
@@ -100,7 +102,8 @@ if __name__ == '__main__':
                         (fn, ext) = os.path.splitext(filename2)
                         if ext.upper() in exts:
                             image_path = os.path.join(dirpath2, filename2)
-                            image_path = pre_work(image_path)
+                            if PREFIX_EXTRACTED not in image_path:
+                                image_path = pre_work(image_path, False)
                             if os.path.exists(image_path):
                                 rand = random.random()
                                 if rand > 0.2:
