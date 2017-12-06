@@ -9,6 +9,7 @@
 
 import os
 import sys
+import csv
 import tensorflow as tf
 from tensorflow.python.framework import ops
 from progressbar import ProgressBar
@@ -18,12 +19,20 @@ from visualize_conv import put_kernels_on_grid
 ops.reset_default_graph()
 random.seed()
 
+DATASET_DIR = "dataset"
+TRAIN_CSV = "train.csv"
+TEST_CSV = "test.csv"
+LABELS_CSV = "labels.csv"
+
 
 def main(options, args):
     # Change Directory
     abspath = os.path.abspath(__file__)
     dname = os.path.dirname(abspath)
     os.chdir(dname)
+
+    # read label
+    label_list = list(csv.reader(open(os.path.join(DATASET_DIR, LABELS_CSV))))
 
     # Set model parameters
     # CNNの各層の特徴量
@@ -38,7 +47,7 @@ def main(options, args):
     image_size = 100
     crop_size = 50
     num_channels = 3
-    num_targets = 20
+    num_targets = len(label_list)
 
     # Exponential Learning Rate Decay Params
     learning_rate = 0.1
@@ -74,13 +83,14 @@ def main(options, args):
         final_image = tf.cast(image_extracted, tf.float32)
         tf.summary.image('training images(Pre)', tf.reshape(final_image, [-1, image_size, image_size, num_channels]))
         # Randomly Crop image
+        final_image = tf.image.resize_images(final_image, [crop_size, crop_size])
 
-        # ↓ここに前処理を追加する
         if distort_images:
             # Randomly flip the image horizontally, change the brightness and contrast
-            print(distort_images)
+            tf.image.random_flip_left_right(final_image)
 
         # Normalize whitening
+        tf.image.per_image_standardization(final_image)
 
         # Randomly resize with crop or pad
 
@@ -90,9 +100,9 @@ def main(options, args):
     # Create a image pipeline from reader
     def input_pipeline(batch_size, train_logical=True):
         if train_logical:
-            csvname = [os.path.join(data_dir, 'face_image_da.csv')]
+            csvname = [os.path.join(data_dir, TRAIN_CSV)]
         else:
-            csvname = [os.path.join(data_dir, 'test_face_image_da.csv')]
+            csvname = [os.path.join(data_dir, TEST_CSV)]
         image, label = read_image_files(csvname)
 
         # min_after_dequeue defines how big a buffer we will randomly sample
@@ -279,40 +289,40 @@ def main(options, args):
         acc_output = ' --- Test Accuracy = {:.2f}%.'.format(100. * temp_accuracy)
         print(acc_output)
 
-    def printTestOutput(target, test_probability):
-        labels = {
-            "other": 0,
-            "simamura": 1,
-            "ckobayashi": 2,
-            "nagadou": 3,
-            "kato": 4,
-            "inoue": 5,
-            "sasaki": 6,
-            "wada": 7,
-            "takahashi": 8,
-            "isegawa": 9,
-            "ishida": 10,
-            "sakurai": 11,
-            "Arnold_Schwarzenegger": 12,
-            "fujimoto": 13,
-            "kinjo": 14,
-            "quy": 15,
-            "takebayasi": 16,
-            "yada": 17,
-            "yanada": 18,
-            "yasukawa": 19,
-        }
-
-        target_prob = ''
-        other_probs = []
-        for label in labels:
-            label_name = labels[label]
-            if target == label_name:
-                target_prob = ' {}:{:.2f}%'.format(label, 100 * test_probability[target])
-            else:
-                other_probs.append('{}:{:.2f}%'.format(label, 100 * test_probability[label_name]))
-        print(target_prob)
-        print(other_probs)
+    # def printTestOutput(target, test_probability):
+    #     labels = {
+    #         "other": 0,
+    #         "simamura": 1,
+    #         "ckobayashi": 2,
+    #         "nagadou": 3,
+    #         "kato": 4,
+    #         "inoue": 5,
+    #         "sasaki": 6,
+    #         "wada": 7,
+    #         "takahashi": 8,
+    #         "isegawa": 9,
+    #         "ishida": 10,
+    #         "sakurai": 11,
+    #         "Arnold_Schwarzenegger": 12,
+    #         "fujimoto": 13,
+    #         "kinjo": 14,
+    #         "quy": 15,
+    #         "takebayasi": 16,
+    #         "yada": 17,
+    #         "yanada": 18,
+    #         "yasukawa": 19,
+    #     }
+    #
+    #     target_prob = ''
+    #     other_probs = []
+    #     for label in labels:
+    #         label_name = labels[label]
+    #         if target == label_name:
+    #             target_prob = ' {}:{:.2f}%'.format(label, 100 * test_probability[target])
+    #         else:
+    #             other_probs.append('{}:{:.2f}%'.format(label, 100 * test_probability[label_name]))
+    #     print(target_prob)
+    #     print(other_probs)
 
     p = ProgressBar()
     p(range(generations))
@@ -326,7 +336,7 @@ def main(options, args):
         if (i + 1) % eval_every == 0:
             [temp_accuracy] = sess.run([accuracy])
             printTestAccuracy(temp_accuracy)
-            printTestOutput(t_tar[0], t_prob[0])
+            # printTestOutput(t_tar[0], t_prob[0])
 
         if loss_value < 0.0001:
             printLossValue(loss_value)
@@ -344,7 +354,7 @@ if __name__ == '__main__':
     parser.add_option('-o', '--output-every', dest='output_every', action='store', type='int', default=100)
     parser.add_option('-e', '--eval-every', dest='eval_every', action='store', type='int', default=100)
     parser.add_option('-d', '--data-directory', dest='data_directory', action='store', type='string',
-                      default='face_image_da')
+                      default=DATASET_DIR)
     parser.add_option('--features1', dest='features1', action='store', type='int', default=32)
     parser.add_option('--features2', dest='features2', action='store', type='int', default=32)
     options, args = parser.parse_args(sys.argv[1:])
