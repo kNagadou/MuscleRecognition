@@ -4,7 +4,7 @@ import csv
 import os
 import random as rand
 import sys
-import CascadeClassifier as cc
+import cascade_classifier as cc
 
 DATASET_DIR = "dataset/"
 TRAIN_CSV_NAME = 'train.csv'
