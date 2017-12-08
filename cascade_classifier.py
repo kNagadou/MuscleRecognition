@@ -19,7 +19,7 @@ def detectObjectFromImage(image_path, cascade_file):
     if image is None:
         print("can not read {}".format(image_path))
     elif PREFIX_EXTRACTED in image_path:
-        print("already extracted {}".format(image_path))
+        print("already detect {}".format(image_path))
     else:
         # グレースケール変換
         image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -54,8 +54,8 @@ def detect_contour(image_path):
     image = cv2.imread(image_path, cv2.IMREAD_COLOR)
     if image is None:
         print("can not read {}".format(image_path))
-    elif PREFIX_EXTRACTED in image_path:
-        print("already extracted {}".format(image_path))
+    elif PREFIX_RECTANGLED in image_path:
+        print("already detect {}".format(image_path))
     else:
         paths = os.path.splitext(image_path)
 
@@ -69,7 +69,7 @@ def detect_contour(image_path):
         #   contours : [領域][Point No][0][x=0, y=1]
         #   cv2.CHAIN_APPROX_NONE: 中間点も保持する
         #   cv2.CHAIN_APPROX_SIMPLE: 中間点は保持しない
-        _, contours, hierarchy = cv2.findContours(bw, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+        _, contours, hierarchy = cv2.findContours(bw, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
         # 矩形検出された数（デフォルトで0を指定）
         detect_count = 0
