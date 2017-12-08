@@ -1,16 +1,7 @@
 import cv2
 import os
 import sys
-
-# cascade path
-CASCADE_PATH = "opencv_cascade_classifier/"
-# cascade file
-UPPER_BODY = CASCADE_PATH + "haarcascade_upperbody.xml"
-FULL_BODY = CASCADE_PATH + "haarcascade_fullbody.xml"
-LOWER_BODY = CASCADE_PATH + "haarcascade_lowerbody.xml"
-# prefix
-PREFIX_EXTRACTED = "_ext"
-PREFIX_RECTANGLED = "_rect"
+import CONST as C
 
 
 def detectObjectFromImage(image_path, cascade_file):
@@ -18,7 +9,7 @@ def detectObjectFromImage(image_path, cascade_file):
     image = cv2.imread(image_path)
     if image is None:
         print("can not read {}".format(image_path))
-    elif PREFIX_EXTRACTED in image_path:
+    elif C.PREFIX_EXTRACTED in image_path:
         print("already detect {}".format(image_path))
     else:
         # グレースケール変換
@@ -39,7 +30,7 @@ def detectObjectFromImage(image_path, cascade_file):
             rectangle_image = cv2.resize(rectangle_image, (100, 100))
 
             # イメージ保存
-            rect_image_path = path[0] + PREFIX_EXTRACTED + str(count) + path[1]
+            rect_image_path = path[0] + C.PREFIX_EXTRACTED + str(count) + path[1]
             cv2.imwrite(rect_image_path, rectangle_image)
             rect_image_paths.append(rect_image_path)
             count += 1
@@ -54,7 +45,7 @@ def detect_contour(image_path):
     image = cv2.imread(image_path, cv2.IMREAD_COLOR)
     if image is None:
         print("can not read {}".format(image_path))
-    elif PREFIX_RECTANGLED in image_path:
+    elif C.PREFIX_RECTANGLED in image_path:
         print("already detect {}".format(image_path))
     else:
         paths = os.path.splitext(image_path)
@@ -91,7 +82,7 @@ def detect_contour(image_path):
                 # cv2.rectangle(src, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
                 # 外接矩形毎に画像を保存
-                rect_image_path = paths[0] + PREFIX_RECTANGLED + str(detect_count) + paths[1]
+                rect_image_path = paths[0] + C.PREFIX_RECTANGLED + str(detect_count) + paths[1]
                 cv2.imwrite(rect_image_path, image[y:y + h, x:x + w])
                 rect_image_paths.append(rect_image_path)
 
@@ -101,4 +92,4 @@ def detect_contour(image_path):
 
 
 if __name__ == '__main__':
-    print(detectObjectFromImage(sys.argv[1], UPPER_BODY))
+    print(detectObjectFromImage(sys.argv[1], C.UPPER_BODY))

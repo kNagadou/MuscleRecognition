@@ -6,12 +6,10 @@ import random as rand
 import sys
 import cascade_classifier as cc
 import cv2
+import CONST as C
 
-DATASET_DIR = "dataset/"
-TRAIN_CSV_NAME = 'train.csv'
-TEST_CSV_NAME = 'test.csv'
-TRAIN_LIST = []
-TEST_LIST = []
+train_list = []
+test_list = []
 
 
 def write_csv(outdir, csvname, data):
@@ -23,9 +21,9 @@ def addDataset(dataPaths, label):
     for dataPath in dataPaths:
         if os.path.exists(dataPath):
             if 50 > rand.randrange(100):
-                TRAIN_LIST.append([dataPath, label])
+                train_list.append([dataPath, label])
             else:
-                TEST_LIST.append([dataPath, label])
+                test_list.append([dataPath, label])
         else:
             print("ERROR {} not found.".format(dataPath))
 
@@ -45,10 +43,10 @@ def createLabelList(list):
 
 
 def resizeImageAndSave(image_path, resize):
-    PREFIX_RESIZE = "_resize"
+
     path = os.path.splitext(image_path)
-    new_image_path = path[0] + PREFIX_RESIZE + path[1]
-    if PREFIX_RESIZE in image_path or cc.PREFIX_EXTRACTED in image_path:
+    new_image_path = path[0] + C.PREFIX_RESIZE + path[1]
+    if C.PREFIX_RESIZE in image_path or C.PREFIX_EXTRACTED in image_path:
         new_image_path = image_path
     else:
         image = cv2.imread(image_path)
@@ -60,20 +58,20 @@ def resizeImageAndSave(image_path, resize):
 if __name__ == '__main__':
     rand.seed()
 
-    if not os.path.isdir(DATASET_DIR):
-        sys.exit('%s is not directory' % DATASET_DIR)
+    if not os.path.isdir(C.DATASET_DIR):
+        sys.exit('%s is not directory' % C.DATASET_DIR)
 
     exts = ['.PNG', '.JPG', '.JPEG']
     label_list = []
-    for dirpath, dirnames, filenames in os.walk(DATASET_DIR):
+    for dirpath, dirnames, filenames in os.walk(C.DATASET_DIR):
         if dirnames != []:
             label_list = createLabelList(dirnames)
-            write_csv(DATASET_DIR, "labels.csv", label_list)
+            write_csv(C.DATASET_DIR, "labels.csv", label_list)
 
     # label[0]: dirname, label[1]: number
     for label in label_list:
         dirname = label[0]
-        member_dir = os.path.join(DATASET_DIR, dirname)
+        member_dir = os.path.join(C.DATASET_DIR, dirname)
         for dirpath, dirnames, filenames in os.walk(member_dir):
             if not dirpath.endswith(dirname):
                 continue
@@ -92,5 +90,5 @@ if __name__ == '__main__':
                     addDataset(save_image_paths, label[1])
         print("{} Done.".format(member_dir))
 
-    write_csv(DATASET_DIR, TRAIN_CSV_NAME, TRAIN_LIST)
-    write_csv(DATASET_DIR, TEST_CSV_NAME, TEST_LIST)
+    write_csv(C.DATASET_DIR, C.TRAIN_CSV_NAME, train_list)
+    write_csv(C.DATASET_DIR, C.TEST_CSV_NAME, test_list)

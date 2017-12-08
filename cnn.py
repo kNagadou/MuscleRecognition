@@ -15,14 +15,10 @@ from tensorflow.python.framework import ops
 from progressbar import ProgressBar
 import random
 from visualize_conv import put_kernels_on_grid
+import CONST as C
 
 ops.reset_default_graph()
 random.seed()
-
-DATASET_DIR = "dataset"
-TRAIN_CSV = "train.csv"
-TEST_CSV = "test.csv"
-LABELS_CSV = "labels.csv"
 
 
 def main(options, args):
@@ -32,7 +28,7 @@ def main(options, args):
     os.chdir(dname)
 
     # read label
-    label_list = list(csv.reader(open(os.path.join(DATASET_DIR, LABELS_CSV))))
+    label_list = list(csv.reader(open(os.path.join(options.data_directory, C.LABELS_CSV_NAME))))
 
     # Set model parameters
     # CNNの各層の特徴量
@@ -100,9 +96,9 @@ def main(options, args):
     # Create a image pipeline from reader
     def input_pipeline(batch_size, train_logical=True):
         if train_logical:
-            csvname = [os.path.join(data_dir, TRAIN_CSV)]
+            csvname = [os.path.join(data_dir, C.TRAIN_CSV_NAME)]
         else:
-            csvname = [os.path.join(data_dir, TEST_CSV)]
+            csvname = [os.path.join(data_dir, C.TEST_CSV_NAME)]
         image, label = read_image_files(csvname)
 
         # min_after_dequeue defines how big a buffer we will randomly sample
@@ -354,7 +350,7 @@ if __name__ == '__main__':
     parser.add_option('-o', '--output-every', dest='output_every', action='store', type='int', default=100)
     parser.add_option('-e', '--eval-every', dest='eval_every', action='store', type='int', default=100)
     parser.add_option('-d', '--data-directory', dest='data_directory', action='store', type='string',
-                      default=DATASET_DIR)
+                      default=C.DATASET_DIR)
     parser.add_option('--features1', dest='features1', action='store', type='int', default=64)
     parser.add_option('--features2', dest='features2', action='store', type='int', default=64)
     options, args = parser.parse_args(sys.argv[1:])
