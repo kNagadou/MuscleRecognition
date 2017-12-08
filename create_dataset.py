@@ -4,7 +4,7 @@ import csv
 import os
 import random as rand
 import sys
-import cascade_classifier as cc
+import detect as dt
 import cv2
 import CONST as C
 
@@ -80,13 +80,13 @@ if __name__ == '__main__':
                 if ext.upper() in exts:
                     image_path = os.path.join(dirpath, filename)
 
-                    # save_image_paths = cc.detectObjectFromImage(image_path, cc.FULL_BODY)
+                    # save_image_paths = dt.detectObjectFromImage(image_path, cc.FULL_BODY)
                     # addDataset(save_image_paths, label[1])
 
                     # save_image_paths = resizeImageAndSave(image_path, 100)
                     # addDataset([save_image_paths], label[1])
 
-                    save_image_paths = cc.detect_contour(image_path)
+                    save_image_paths = dt.detect_contour(image_path)
                     addDataset(save_image_paths, label[1])
         print("{} Done.".format(member_dir))
 
