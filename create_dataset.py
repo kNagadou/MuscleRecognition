@@ -82,12 +82,14 @@ if __name__ == '__main__':
                 if ext.upper() in exts:
                     image_path = os.path.join(dirpath, filename)
 
-                    # ext_image_paths = cc.detectObjectFromImage(image_path, cc.UPPER_BODY)
-                    # addDataset(ext_image_paths, label[1])
+                    # save_image_paths = cc.detectObjectFromImage(image_path, cc.FULL_BODY)
+                    # addDataset(save_image_paths, label[1])
 
-                    resize_image_path = resizeImageAndSave(image_path, 100)
+                    # save_image_paths = resizeImageAndSave(image_path, 100)
+                    # addDataset([save_image_paths], label[1])
 
-                    addDataset([resize_image_path], label[1])
+                    save_image_paths = cc.detect_contour(image_path)
+                    addDataset(save_image_paths, label[1])
         print("{} Done.".format(member_dir))
 
     write_csv(DATASET_DIR, TRAIN_CSV_NAME, TRAIN_LIST)

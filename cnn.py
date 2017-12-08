@@ -355,8 +355,8 @@ if __name__ == '__main__':
     parser.add_option('-e', '--eval-every', dest='eval_every', action='store', type='int', default=100)
     parser.add_option('-d', '--data-directory', dest='data_directory', action='store', type='string',
                       default=DATASET_DIR)
-    parser.add_option('--features1', dest='features1', action='store', type='int', default=32)
-    parser.add_option('--features2', dest='features2', action='store', type='int', default=32)
+    parser.add_option('--features1', dest='features1', action='store', type='int', default=64)
+    parser.add_option('--features2', dest='features2', action='store', type='int', default=64)
     options, args = parser.parse_args(sys.argv[1:])
 
     main(options, args)
