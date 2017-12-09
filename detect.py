@@ -2,6 +2,7 @@ import cv2
 import os
 import sys
 import CONST as C
+import selectivesearch as ss
 
 
 def detectObjectFromImage(image_path, cascade_file):
@@ -85,8 +86,45 @@ def detect_contour(image_path):
                 rect_image_path = paths[0] + C.PREFIX_RECTANGLED + str(detect_count) + paths[1]
                 cv2.imwrite(rect_image_path, image[y:y + h, x:x + w])
                 rect_image_paths.append(rect_image_path)
-
                 detect_count = detect_count + 1
+
+    return rect_image_paths
+
+
+def selectivesearch(image_path):
+    rect_image_paths = []
+    image = cv2.imread(image_path)
+    if image is None:
+        print("can not read {}".format(image_path))
+    elif C.PREFIX_RECTANGLED in image_path:
+        print("already detect {}".format(image_path))
+    else:
+        paths = os.path.splitext(image_path)
+        img_lbl, regions = ss.selective_search(image, scale=500, sigma=0.9, min_size=10)
+
+        candidates = set()
+        for r in regions:
+            # excluding same rectangle (with different segments)
+            if r['rect'] in candidates:
+                continue
+            # excluding regions smaller than 2000 pixels
+            if r['size'] < 2000:
+                continue
+            # distorted rects
+            x, y, w, h = r['rect']
+            if w / h > 1.2 or h / w > 1.2:
+                continue
+            candidates.add(r['rect'])
+
+        # draw rectangles on the original image
+        detect_count = 0
+        for x, y, w, h in candidates:
+            rectangle_image = image[y:y + h, x:x + w]
+            rectangle_image = cv2.resize(rectangle_image, (100, 100))
+            rect_image_path = paths[0] + C.PREFIX_RECTANGLED + str(detect_count) + paths[1]
+            cv2.imwrite(rect_image_path, rectangle_image)
+            rect_image_paths.append(rect_image_path)
+            detect_count = detect_count + 1
 
     return rect_image_paths
 

@@ -81,13 +81,14 @@ if __name__ == '__main__':
                     image_path = os.path.join(dirpath, filename)
 
                     # save_image_paths = dt.detectObjectFromImage(image_path, cc.FULL_BODY)
-                    # addDataset(save_image_paths, label[1])
 
-                    # save_image_paths = resizeImageAndSave(image_path, 100)
-                    # addDataset([save_image_paths], label[1])
+                    # save_image_paths = [resizeImageAndSave(image_path, 100)]
 
-                    save_image_paths = dt.detect_contour(image_path)
+                    # save_image_paths = dt.detect_contour(image_path)
+
+                    save_image_paths = dt.selectivesearch(image_path)
                     addDataset(save_image_paths, label[1])
+
         print("{} Done.".format(member_dir))
 
     write_csv(C.DATASET_DIR, C.TRAIN_CSV_NAME, train_list)
